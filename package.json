@@ -11,8 +11,12 @@
     "eslint": "^7.32.0",
     "eslint-config-custom": "workspace:*",
     "prettier": "^2.5.1",
-    "turbo": "latest"
+    "turbo": "latest",
+    "@tanstack/react-query-devtools": "^4.32.6"
   },
   "packageManager": "pnpm@8.6.10",
-  "name": "first-turbo-repo"
+  "name": "first-turbo-repo",
+  "dependencies": {
+    "@tanstack/react-query": "^4.32.6"
+  }
 }

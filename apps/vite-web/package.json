@@ -10,8 +10,14 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@tanstack/react-query": "^4.32.6",
+    "@tanstack/react-query-devtools": "^4.7.1",
+    "@algolia/client-search": "4.11.0",
+    "@algolia/transporter": "4.11.0",
+    "algoliasearch": "4.12.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-hook-form": "^7.45.4",
     "ui": "workspace:*"
   },
   "devDependencies": {
@@ -22,8 +28,9 @@
     "@vitejs/plugin-react": "^4.0.3",
     "eslint": "^7.32.0",
     "eslint-config-custom": "workspace:*",
-    "typescript": "^4.5.2",
+    "rollup-plugin-analyzer": "^4.0.0",
     "tsconfig": "workspace:*",
+    "typescript": "^4.5.2",
     "vite": "^4.4.5"
   }
 }

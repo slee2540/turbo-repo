@@ -1,90 +1,129 @@
-import Image from 'next/image'
-import styles from './page.module.css'
+'use client'
+import * as React from 'react'
+import axios from 'axios'
+// import { Button, Header } from 'ui'
+import {
+  useQuery,
+  useQueryClient,
+  useMutation,
+  QueryClient,
+  QueryClientProvider,
+} from '@tanstack/react-query'
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 
-export default function Home() {
+const client = new QueryClient()
+
+type Todos = {
+  items: readonly {
+    id: string
+    text: string
+  }[]
+  ts: number
+}
+
+async function fetchTodos(): Promise<Todos> {
+  const res = await axios.get('/api/data')
+  return res.data
+}
+
+function useTodos() {
+  return useQuery({ queryKey: ['todos'], queryFn: fetchTodos })
+}
+
+const Example = () => {
+  const queryClient = useQueryClient()
+  const [text, setText] = React.useState('')
+  const { isFetching, ...queryInfo } = useTodos()
+
+  const addTodoMutation = useMutation({
+    mutationFn: (newTodo) => axios.post('/api/data', { text: newTodo }),
+    // When mutate is called:
+    onMutate: async (newTodo: string) => {
+      setText('')
+      // Cancel any outgoing refetches
+      // (so they don't overwrite our optimistic update)
+      await queryClient.cancelQueries({ queryKey: ['todos'] })
+
+      // Snapshot the previous value
+      const previousTodos = queryClient.getQueryData<Todos>(['todos'])
+      console.log('previousTodos', previousTodos)
+
+      // Optimistically update to the new value
+      if (previousTodos) {
+        queryClient.setQueryData<Todos>(['todos'], {
+          ...previousTodos,
+          items: [
+            ...previousTodos.items,
+            { id: Math.random().toString(), text: newTodo },
+          ],
+        })
+      }
+
+      return { previousTodos }
+    },
+    // If the mutation fails,
+    // use the context returned from onMutate to roll back
+    onError: (err, variables, context) => {
+      console.log('onError', err, variables, context)
+      if (context?.previousTodos) {
+        queryClient.setQueryData<Todos>(['todos'], context.previousTodos)
+      }
+    },
+    // Always refetch after error or success:
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['todos'] })
+      console.log('onSettled', queryClient)
+    },
+  })
+
   return (
-    <main className={styles.main}>
-      <div className={styles.description}>
-        <p>
-          Get started by editing&nbsp;
-          <code className={styles.code}>src/app/page.tsx</code>
-        </p>
-        <div>
-          <a
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer">
-            By{' '}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className={styles.vercelLogo}
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
-        </div>
-      </div>
-
-      <div className={styles.center}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
+    <div>
+      <p>
+        In this example, new items can be created using a mutation. The new item
+        will be optimistically added to the list in hopes that the server
+        accepts the item. If it does, the list is refetched with the true items
+        from the list. Every now and then, the mutation may fail though. When
+        that happens, the previous list of items is restored and the list is
+        again refetched from the server.
+      </p>
+      <form
+        onSubmit={(e) => {
+          e.preventDefault()
+          addTodoMutation.mutate(text)
+        }}>
+        <input
+          type="text"
+          onChange={(event) => setText(event.target.value)}
+          value={text}
         />
-      </div>
+        <button disabled={addTodoMutation.isLoading}>Create</button>
+      </form>
+      <br />
+      {queryInfo.isSuccess && (
+        <>
+          <div>
+            {/* The type of queryInfo.data will be narrowed because we check for isSuccess first */}
+            Updated At: {new Date(queryInfo.data.ts).toLocaleTimeString()}
+          </div>
+          <ul>
+            {queryInfo.data.items.map((todo) => (
+              <li key={todo.id}>{todo.text}</li>
+            ))}
+          </ul>
+          {isFetching && <div>Updating in background...</div>}
+        </>
+      )}
+      {queryInfo.isLoading && 'Loading'}
+      {queryInfo.error instanceof Error && queryInfo.error.message}
+    </div>
+  )
+}
 
-      <div className={styles.grid}>
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer">
-          <h2>
-            Docs <span>-&gt;</span>
-          </h2>
-          <p>Find in-depth information about Next.js features and API.</p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer">
-          <h2>
-            Learn <span>-&gt;</span>
-          </h2>
-          <p>Learn about Next.js in an interactive course with&nbsp;quizzes!</p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer">
-          <h2>
-            Templates <span>-&gt;</span>
-          </h2>
-          <p>Explore the Next.js 13 playground.</p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer">
-          <h2>
-            Deploy <span>-&gt;</span>
-          </h2>
-          <p>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
+export default function home() {
+  return (
+    <QueryClientProvider client={client}>
+      <Example />
+      <ReactQueryDevtools initialIsOpen />
+    </QueryClientProvider>
   )
 }
