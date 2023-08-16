@@ -10,25 +10,34 @@
     /* Bundler mode */
     "moduleResolution": "Node",
     // "allowImportingTsExtensions": true,
+    "composite": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "noEmit": false,
-    "noEmitOnError": false,
+    // "noEmitOnError": false,
     "jsx": "react-jsx",
 
     /* Linting */
     "strict": true,
     "useUnknownInCatchVariables": false,
-    "strictNullChecks": false,
-    // "strictNullChecks": true,
-    // "alwaysStrict": true
-    "allowSyntheticDefaultImports": true
+    "strictNullChecks": true,
+    "allowSyntheticDefaultImports": true,
     // "useUnknownInCatchVariables": true,
     // "noUnusedLocals": true,
     // "noUnusedParameters": true,
     // "noFallthroughCasesInSwitch": false
-  }
-  // "refereßnces": [{ "path": "./tsconfig.node.json" }]
+    "baseUrl": "src",
+    "paths": {
+      "@/*": ["*"],
+      // "@components/*": ["components/*"],
+      "@layouts": ["layouts"],
+      "@layouts/*": ["layouts/*"]
+      // "@Components": ["./src/components"],
+      // "@Components/*": ["./src/components/*"],
+      // "@Layouts": ["./src/layouts"],
+      // "@Layouts/*": ["./src/layouts/*"]
+    }
+  },
+  "refereßnces": [{ "path": "./tsconfig.node.json" }]
   // "include": ["src"],
   // "exclude": ["**/*.ts", "**/*.tsx"]
 }
