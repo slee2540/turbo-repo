@@ -1,1 +1,1 @@
-export * from './Rick'
+export * from './rick'
