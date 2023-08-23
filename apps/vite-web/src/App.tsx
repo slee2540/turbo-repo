@@ -19,6 +19,7 @@ function App() {
             <Route path="" element={<Home />} />
             <Route path="about" element={<About />} />
             <Route path="dashboard" element={<Dashboard />} />
+            <Route path="test" element={<NoMatch />} />
             <Route path="*" element={<NoMatch />} />
           </Route>
         </Routes>
