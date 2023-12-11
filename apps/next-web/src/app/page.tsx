@@ -25,15 +25,25 @@ async function fetchTodos(): Promise<Todos> {
   const res = await axios.get('/api/data')
   return res.data
 }
+async function fetchMongo(): Promise<any> {
+  const res = await axios.get('/api/mongo')
+  return res.data
+}
 
 function useTodos() {
   return useQuery({ queryKey: ['todos'], queryFn: fetchTodos })
+}
+function useMongo() {
+  return useQuery({ queryKey: ['mongo'], queryFn: fetchMongo })
 }
 
 const Example = () => {
   const queryClient = useQueryClient()
   const [text, setText] = React.useState('')
   const { isFetching, ...queryInfo } = useTodos()
+  const { data } = useMongo()
+
+  console.log('mongo data ----> ', data)
 
   const addTodoMutation = useMutation({
     mutationFn: (newTodo) => axios.post('/api/data', { text: newTodo }),
